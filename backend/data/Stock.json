@@ -1,0 +1,15 @@
+[
+  {
+    "instrumentId": "AAPL",
+    "isin": "US0378331005",
+    "name": "Apple Inc.",
+    "tradingLines": ["AAPL.N", "AAPL.O" ]
+  },
+  {
+    "instrumentId": "MSFT",
+    "isin": "US5949181045",
+    "name": "Microsoft Corp.",
+    "tradingLines": ["MSFT.O"]
+  }
+]
+

@@ -1,0 +1,6 @@
+[
+  { "mic": "XNYS", "name": "New York Stock Exchange" },
+  { "mic": "XNAS", "name": "Nasdaq" },
+  { "mic": "XCME", "name": "CME" }
+]
+

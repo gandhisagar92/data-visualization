@@ -1,0 +1,30 @@
+[
+  {
+    "tradingLineId": "AAPL.N",
+    "postTradeId": "PT-AAPL-N",
+    "ric": "AAPL.N",
+    "bloombergTicker": "AAPL US",
+    "currency": "USD",
+    "exchangeMic": "XNYS",
+    "tradingSession": "REG"
+  },
+  {
+    "tradingLineId": "AAPL.O",
+    "postTradeId": "PT-AAPL-O",
+    "ric": "AAPL.O",
+    "bloombergTicker": "AAPL UW",
+    "currency": "USD",
+    "exchangeMic": "XNAS",
+    "tradingSession": "REG"
+  },
+  {
+    "tradingLineId": "MSFT.O",
+    "postTradeId": "PT-MSFT-O",
+    "ric": "MSFT.O",
+    "bloombergTicker": "MSFT UW",
+    "currency": "USD",
+    "exchangeMic": "XNAS",
+    "tradingSession": "REG"
+  }
+]
+

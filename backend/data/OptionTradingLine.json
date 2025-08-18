@@ -1,0 +1,19 @@
+[
+  {
+    "tradingLineId": "AAPL240621C00190000.O",
+    "ric": "AAPL240621C00190000.O",
+    "bloombergTicker": "AAPL 06/21/24 C190",
+    "currency": "USD",
+    "exchangeMic": "XNAS",
+    "tradingSession": "REG"
+  },
+  {
+    "tradingLineId": "MSFT240621P00280000.O",
+    "ric": "MSFT240621P00280000.O",
+    "bloombergTicker": "MSFT 06/21/24 P280",
+    "currency": "USD",
+    "exchangeMic": "XNAS",
+    "tradingSession": "REG"
+  }
+]
+
