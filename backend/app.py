@@ -1,4 +1,5 @@
 import os
+import logging
 import tornado.ioloop
 import tornado.web
 from handlers import MetaHandler, SearchHandler, NodeHandler, ExpandHandler
@@ -25,6 +26,7 @@ def make_app() -> tornado.web.Application:
 
 
 def main():
+    logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"))
     port = int(os.environ.get("PORT", "8000"))
     app = make_app()
     app.listen(port)

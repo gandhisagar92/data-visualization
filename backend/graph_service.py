@@ -1,5 +1,8 @@
 from typing import Any, Dict, List
+import logging
 from .store import FileJsonStore
+
+logger = logging.getLogger(__name__)
 
 
 class GraphService:
@@ -152,6 +155,7 @@ class GraphService:
                     self._expand_relationships("Index", idx, nodes, edges)
 
     def search(self, reference_data_type: str, query_by_type: str, inputs: Dict[str, Any]) -> Dict[str, Any]:
+        logger.info("search called: refType=%s queryBy=%s inputs=%s", reference_data_type, query_by_type, inputs)
         type_to_entity = {
             "StockInstrument": ("Stock", "instrumentId"),
             "OptionInstrument": ("Option", "instrumentId"),
@@ -190,12 +194,14 @@ class GraphService:
         edges: List[Dict[str, Any]] = []
 
         if not candidates:
+            logger.info("no candidates found for %s by %s", entity_name, attribute_type)
             return {"metaVersion": 1, "nodes": [], "edges": [], "root": None}
 
         root_payload = candidates[0]
         root_node = self._shape_node(entity_name, root_payload)
         nodes[root_node["id"]] = root_node
         self._expand_relationships(entity_name, root_payload, nodes, edges)
+        logger.info("graph built: nodes=%d edges=%d root=%s", len(nodes), len(edges), root_node["id"])
 
         return {
             "metaVersion": 1,
@@ -205,6 +211,7 @@ class GraphService:
         }
 
     def expand(self, node_type: str, business_id: str) -> Dict[str, Any]:
+        logger.debug("expand called: nodeType=%s id=%s", node_type, business_id)
         if node_type in ("StockTradingLine", "OptionTradingLine", "IndexTradingLine", "FutureTradingLine"):
             payload = self.store.get_by_id(node_type, "tradingLineId", business_id)
         elif node_type == "Exchange":
@@ -215,6 +222,7 @@ class GraphService:
             payload = self.store.get_by_id(node_type, "instrumentId", business_id)
 
         if not payload:
+            logger.warning("expand not found: %s %s", node_type, business_id)
             return {"metaVersion": 1, "nodes": [], "edges": [], "root": None}
 
         nodes: Dict[str, Dict[str, Any]] = {}
@@ -222,5 +230,6 @@ class GraphService:
         node = self._shape_node(node_type, payload)
         nodes[node["id"]] = node
         self._expand_relationships(node_type, payload, nodes, edges)
+        logger.debug("expand built: nodes=%d edges=%d", len(nodes), len(edges))
         return {"metaVersion": 1, "nodes": list(nodes.values()), "edges": edges, "root": node["id"]}
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import ForceGraph2D, { NodeObject, LinkObject } from 'react-force-graph-2d'
 import MindMapTree from './components/MindMapTree'
 import axios from 'axios'
+import { logger } from './lib/logger'
 
 type MetaInput = { id: string; label: string; kind: 'text' | 'number' | 'date' | 'select'; options?: string[] }
 type MetaQuery = { type: string; inputs: MetaInput[] }
@@ -17,53 +17,45 @@ const panelStyles: React.CSSProperties = {
   gridTemplateColumns: '420px 1fr',
   gridTemplateRows: '330px 1fr',
   height: '100vh',
-  gap: '8px',
-  padding: '8px',
+  gap: '12px',
+  padding: '12px',
   boxSizing: 'border-box',
-  background: '#0c1116',
-  color: '#e6edf3',
+  background: '#0b1220',
+  color: '#E2E8F0',
   fontFamily: 'Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif'
 }
 
 const cardStyle: React.CSSProperties = {
-  background: '#151b23',
-  border: '1px solid #2d3846',
-  borderRadius: 10,
-  padding: 12,
-  overflow: 'auto'
+  background: 'linear-gradient(180deg, #0f172a 0%, #0b1220 100%)',
+  border: '1px solid #1f2a44',
+  borderRadius: 16,
+  padding: 16,
+  overflow: 'auto',
+  boxShadow: '0 10px 25px rgba(0,0,0,0.3)'
 }
 
-const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, color: '#9FB3C8', marginBottom: 4 }
+const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, color: '#94A3B8', marginBottom: 6 }
 const inputStyle: React.CSSProperties = {
   width: '100%',
-  padding: '8px 10px',
-  borderRadius: 8,
-  border: '1px solid #2d3846',
-  background: '#0f141a',
-  color: '#e6edf3',
-  marginBottom: 8
+  padding: '10px 12px',
+  borderRadius: 10,
+  border: '1px solid #243253',
+  background: '#0b1426',
+  color: '#E2E8F0',
+  marginBottom: 10
 }
 const selectStyle = inputStyle
 
 const buttonStyle: React.CSSProperties = {
   padding: '10px 14px',
-  borderRadius: 8,
-  border: '1px solid #2d3846',
-  background: '#238636',
+  borderRadius: 10,
+  border: '1px solid #1f2a44',
+  background: 'linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%)',
   color: 'white',
   cursor: 'pointer',
-  fontWeight: 600
+  fontWeight: 600,
+  boxShadow: '0 6px 16px rgba(29,78,216,0.35)'
 }
-
-const chipStyle = (active: boolean): React.CSSProperties => ({
-  padding: '2px 8px',
-  borderRadius: 999,
-  border: '1px solid #2d3846',
-  background: active ? '#1f6feb' : '#0f141a',
-  color: active ? 'white' : '#9FB3C8',
-  fontSize: 12,
-  marginRight: 6
-})
 
 function App() {
   const [meta, setMeta] = useState<Meta | null>(null)
@@ -79,6 +71,7 @@ function App() {
   useEffect(() => {
     axios.get('/api/meta').then(r => {
       setMeta(r.data as Meta)
+      logger.info('Loaded meta')
     })
   }, [])
 
@@ -96,23 +89,27 @@ function App() {
   }, [currentQuery?.type])
 
   const onSearch = async () => {
+    logger.info('Search', { refType, queryBy, inputs })
     const res = await axios.post('/api/search', {
       referenceDataType: refType,
       queryByType: queryBy,
       inputs
     })
     setGraph(res.data)
-    // seed cache with returned nodes
+    logger.debug('Graph received', res.data)
     ;(res.data.nodes as GraphNode[]).forEach(n => {
       payloadCache.current.set(n.id, n)
     })
   }
 
-  const nodes = useMemo(() => graph?.nodes ?? [], [graph])
-  const links = useMemo(() => (graph?.edges ?? []).map(e => ({ ...e })), [graph])
+  const [filterText, setFilterText] = useState('')
+  const filteredGraph = useMemo<GraphResponse | null>(() => {
+    if (!graph || !filterText.trim()) return graph
+    // Let MindMapTree perform whole-subtree filtering; pass through graph here
+    return { ...graph }
+  }, [graph, filterText])
 
-  const handleNodeClick = async (nodeObj: NodeObject) => {
-    const node = nodeObj as GraphNode
+  const handleNodeClick = async (node: GraphNode) => {
     setSelectedNode(node)
     if (payloadCache.current.has(node.id)) return
     const [type, businessId] = node.id.split(':')
@@ -121,54 +118,6 @@ function App() {
     payloadCache.current.set(node.id, fullNode)
     setSelectedNode(fullNode)
   }
-
-  const drawNode = (node: NodeObject, ctx: CanvasRenderingContext2D, globalScale: number) => {
-    const n = node as GraphNode
-    const attrs = n.attributes || {}
-    const label = n.label || n.id
-    const lines: string[] = [label]
-    Object.keys(attrs).forEach(k => {
-      const v = attrs[k]
-      if (v === undefined || v === null || v === '') return
-      lines.push(`${k}: ${v}`)
-    })
-    const fontSize = 12 / Math.sqrt(globalScale)
-    ctx.font = `${fontSize}px Inter, system-ui`
-    const paddingX = 8
-    const paddingY = 6
-    const width = Math.max(...lines.map(l => ctx.measureText(l).width)) + paddingX * 2
-    const height = (fontSize + 4) * lines.length + paddingY * 2
-    ctx.fillStyle = '#0f141a'
-    ctx.strokeStyle = '#2d3846'
-    ctx.lineWidth = 1
-    ctx.beginPath()
-    ctx.roundRect((n as any).x - width / 2, (n as any).y - height / 2, width, height, 8)
-    ctx.fill()
-    ctx.stroke()
-    ctx.textAlign = 'left'
-    ctx.textBaseline = 'middle'
-    ctx.fillStyle = '#e6edf3'
-    lines.forEach((l, i) => {
-      ctx.fillText(l, (n as any).x - width / 2 + paddingX, (n as any).y - height / 2 + paddingY + i * (fontSize + 4) + fontSize / 2)
-    })
-  }
-
-  const graphRef = useRef<any>(null)
-
-  // Filtering UI for large child sets (client-side immediate filter by attribute match)
-  const [filterText, setFilterText] = useState('')
-  const filteredGraph = useMemo<GraphResponse | null>(() => {
-    if (!graph || !filterText.trim()) return graph
-    const term = filterText.toLowerCase()
-    const keepNode = (n: GraphNode) =>
-      (n.label || '').toLowerCase().includes(term) ||
-      Object.values(n.attributes || {}).some(v => String(v).toLowerCase().includes(term))
-
-    const keptNodes = graph.nodes.filter(keepNode)
-    const keptIds = new Set(keptNodes.map(n => n.id))
-    const keptEdges = graph.edges.filter(e => keptIds.has(e.source) && keptIds.has(e.target))
-    return { ...graph, nodes: keptNodes, edges: keptEdges }
-  }, [graph, filterText])
 
   return (
     <div style={panelStyles}>
@@ -237,12 +186,6 @@ function App() {
             onChange={e => setFilterText(e.target.value)}
           />
         </div>
-
-        <div style={{ marginTop: 10 }}>
-          <span style={chipStyle(true)}>Pan: drag background</span>
-          <span style={chipStyle(true)}>Zoom: mouse wheel</span>
-          <span style={chipStyle(true)}>Drag node to reposition</span>
-        </div>
       </div>
 
       <div style={{ ...cardStyle, gridColumn: '1 / 2', gridRow: '2 / 3' }}>
@@ -250,7 +193,7 @@ function App() {
         {selectedNode ? (
           <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(selectedNode.attributes ?? {}, null, 2)}</pre>
         ) : (
-          <div style={{ color: '#9FB3C8' }}>Click a node to view payload</div>
+          <div style={{ color: '#94A3B8' }}>Hover a node to view payload in tooltip; click to pin here</div>
         )}
       </div>
 
@@ -258,7 +201,7 @@ function App() {
         <MindMapTree
           graph={filteredGraph || null}
           filterText={filterText}
-          onNodeClick={(n) => setSelectedNode(n)}
+          onNodeClick={handleNodeClick}
         />
       </div>
     </div>
@@ -266,4 +209,3 @@ function App() {
 }
 
 export default App
-

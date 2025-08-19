@@ -1,7 +1,10 @@
 import tornado.web
 import tornado.escape
 from typing import Any
+import logging
 from .meta import Meta
+
+logger = logging.getLogger(__name__)
 
 
 def cors(fn):
@@ -44,6 +47,7 @@ class SearchHandler(BaseHandler):
         query_by = data.get("queryByType")
         inputs = data.get("inputs", {})
 
+        logger.info("/api/search %s %s", ref_type, query_by)
         result = self.graph_service.search(ref_type, query_by, inputs)
         self.write(result)
 
@@ -51,6 +55,7 @@ class SearchHandler(BaseHandler):
 class NodeHandler(BaseHandler):
     @cors
     async def get(self, node_type: str, business_id: str):
+        logger.debug("/api/node %s %s", node_type, business_id)
         if node_type in ("StockTradingLine", "OptionTradingLine", "IndexTradingLine", "FutureTradingLine"):
             payload = self.store.get_by_id(node_type, "tradingLineId", business_id)
         elif node_type == "Exchange":
@@ -76,6 +81,7 @@ class ExpandHandler(BaseHandler):
             self.set_status(400)
             self.write({"error": "nodeType and id are required"})
             return
+        logger.info("/api/expand %s %s", node_type, business_id)
         result = self.graph_service.expand(node_type, business_id)
         self.write(result)
 

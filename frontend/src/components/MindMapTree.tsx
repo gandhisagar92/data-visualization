@@ -59,7 +59,7 @@ export default function MindMapTree({ graph, filterText = '', onNodeClick }: Min
 
     let rootTree = build(graph.root)
 
-    // Apply filter: if filter is set, keep only nodes that match or lead to matches
+    // Apply filter: if filter is set, keep any subtree that contains a match anywhere (entire mindmap filter)
     if (term && rootTree) {
       function filterTree(n: TreeNode): TreeNode | null {
         const keptChildren = (n.children || []).map(filterTree).filter(Boolean) as TreeNode[]
@@ -147,12 +147,16 @@ export default function MindMapTree({ graph, filterText = '', onNodeClick }: Min
 
   const renderNode = (n: TreeNode) => {
     const attrs = Object.entries(n.attributes || {})
-    const lines = [n.label || n.id, ...attrs.map(([k, v]) => `${k}: ${String(v)}`)]
-    const NODE_H = 48 + Math.max(0, lines.length - 1) * ROW_H
+    const title = n.label || n.id
+    // Only show name on the component; attributes on hover via <title>
+    const lines = [title]
+    const tooltip = [title, ...attrs.map(([k, v]) => `${k}: ${String(v)}`)].join('\n')
+    const NODE_H = 48
     return (
       <motion.g
         key={n.id}
         initial={{ opacity: 0, scale: 0.98 }}
+        whileHover={{ scale: 1.02 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ type: 'spring', stiffness: 260, damping: 22 }}
         onClick={() => onNodeClick && onNodeClick(n)}
@@ -166,10 +170,19 @@ export default function MindMapTree({ graph, filterText = '', onNodeClick }: Min
           width={NODE_W}
           height={NODE_H}
           filter="url(#shadow)"
-          fill={(n.depth || 0) === 0 ? '#1f6feb' : '#0f141a'}
+          fill={(n.depth || 0) === 0 ? '#1f6feb' : '#111827'}
           stroke={(n.depth || 0) === 0 ? '#1b4fb1' : '#2d3846'}
           strokeWidth={1.5}
+          onMouseEnter={(e) => {
+            const el = e.currentTarget
+            el.setAttribute('fill', (n.depth || 0) === 0 ? '#1a61cf' : '#0f141a')
+          }}
+          onMouseLeave={(e) => {
+            const el = e.currentTarget
+            el.setAttribute('fill', (n.depth || 0) === 0 ? '#1f6feb' : '#111827')
+          }}
         />
+        <title>{tooltip}</title>
         {lines.map((t, i) => (
           <text
             key={`${n.id}-line-${i}`}
