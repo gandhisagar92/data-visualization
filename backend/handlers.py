@@ -2,7 +2,7 @@ import tornado.web
 import tornado.escape
 from typing import Any
 import logging
-from .meta import Meta
+from meta import Meta
 
 logger = logging.getLogger(__name__)
 

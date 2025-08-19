@@ -1,6 +1,9 @@
 [
   { "mic": "XNYS", "name": "New York Stock Exchange" },
   { "mic": "XNAS", "name": "Nasdaq" },
-  { "mic": "XCME", "name": "CME" }
+  { "mic": "XCME", "name": "CME" },
+  { "mic": "XFRA", "name": "XETRA" },
+  { "mic": "XLON", "name": "London Stock Exchange" },
+  { "mic": "XHKG", "name": "Hong Kong Exchange" }
 ]
 

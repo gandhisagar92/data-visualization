@@ -7,7 +7,10 @@ const LEVEL_ORDER: Record<LogLevel, number> = {
   error: 40
 }
 
-const currentLevel: LogLevel = (import.meta.env.VITE_LOG_LEVEL as LogLevel) || 'info'
+// Fallback-friendly env access without strict typing on Vite
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const viteEnv: any = (import.meta as any).env || {}
+const currentLevel: LogLevel = (viteEnv.VITE_LOG_LEVEL as LogLevel) || 'info'
 
 function shouldLog(level: LogLevel) {
   return LEVEL_ORDER[level] >= LEVEL_ORDER[currentLevel]

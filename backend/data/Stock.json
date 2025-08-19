@@ -10,6 +10,18 @@
     "isin": "US5949181045",
     "name": "Microsoft Corp.",
     "tradingLines": ["MSFT.O"]
+  },
+  {
+    "instrumentId": "GOOG",
+    "isin": "US02079K3059",
+    "name": "Alphabet Inc. Class C",
+    "tradingLines": ["GOOG.O", "GOOGL.O"]
+  },
+  {
+    "instrumentId": "TSLA",
+    "isin": "US88160R1014",
+    "name": "Tesla Inc.",
+    "tradingLines": ["TSLA.O"]
   }
 ]
 

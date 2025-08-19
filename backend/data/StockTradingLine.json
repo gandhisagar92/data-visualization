@@ -25,6 +25,33 @@
     "currency": "USD",
     "exchangeMic": "XNAS",
     "tradingSession": "REG"
+  },
+  {
+    "tradingLineId": "GOOG.O",
+    "postTradeId": "PT-GOOG-O",
+    "ric": "GOOG.O",
+    "bloombergTicker": "GOOG UW",
+    "currency": "USD",
+    "exchangeMic": "XNAS",
+    "tradingSession": "REG"
+  },
+  {
+    "tradingLineId": "GOOGL.O",
+    "postTradeId": "PT-GOOGL-O",
+    "ric": "GOOGL.O",
+    "bloombergTicker": "GOOGL UW",
+    "currency": "USD",
+    "exchangeMic": "XNAS",
+    "tradingSession": "REG"
+  },
+  {
+    "tradingLineId": "TSLA.O",
+    "postTradeId": "PT-TSLA-O",
+    "ric": "TSLA.O",
+    "bloombergTicker": "TSLA UW",
+    "currency": "USD",
+    "exchangeMic": "XNAS",
+    "tradingSession": "REG"
   }
 ]
 

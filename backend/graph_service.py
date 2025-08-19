@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 import logging
-from .store import FileJsonStore
+from store import FileJsonStore
 
 logger = logging.getLogger(__name__)
 

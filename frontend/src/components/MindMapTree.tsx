@@ -159,6 +159,7 @@ export default function MindMapTree({ graph, filterText = '', onNodeClick }: Min
         whileHover={{ scale: 1.02 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+        onMouseEnter={() => onNodeClick && onNodeClick(n)}
         onClick={() => onNodeClick && onNodeClick(n)}
         style={{ cursor: onNodeClick ? 'pointer' : 'default' }}
       >
