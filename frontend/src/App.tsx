@@ -123,29 +123,33 @@ function App() {
 
   const drawNode = (node: NodeObject, ctx: CanvasRenderingContext2D, globalScale: number) => {
     const n = node as GraphNode
+    const attrs = n.attributes || {}
     const label = n.label || n.id
+    const lines: string[] = [label]
+    Object.keys(attrs).forEach(k => {
+      const v = attrs[k]
+      if (v === undefined || v === null || v === '') return
+      lines.push(`${k}: ${v}`)
+    })
     const fontSize = 12 / Math.sqrt(globalScale)
     ctx.font = `${fontSize}px Inter, system-ui`
-    const textWidth = ctx.measureText(label).width
-    const padding = 6
-    const bckgDimensions = [textWidth + padding * 2, fontSize + padding * 2] as const
+    const paddingX = 8
+    const paddingY = 6
+    const width = Math.max(...lines.map(l => ctx.measureText(l).width)) + paddingX * 2
+    const height = (fontSize + 4) * lines.length + paddingY * 2
     ctx.fillStyle = '#0f141a'
     ctx.strokeStyle = '#2d3846'
     ctx.lineWidth = 1
     ctx.beginPath()
-    ctx.roundRect(
-      (n as any).x - bckgDimensions[0] / 2,
-      (n as any).y - bckgDimensions[1] / 2,
-      bckgDimensions[0],
-      bckgDimensions[1],
-      8
-    )
+    ctx.roundRect((n as any).x - width / 2, (n as any).y - height / 2, width, height, 8)
     ctx.fill()
     ctx.stroke()
-    ctx.textAlign = 'center'
+    ctx.textAlign = 'left'
     ctx.textBaseline = 'middle'
     ctx.fillStyle = '#e6edf3'
-    ctx.fillText(label, (n as any).x, (n as any).y)
+    lines.forEach((l, i) => {
+      ctx.fillText(l, (n as any).x - width / 2 + paddingX, (n as any).y - height / 2 + paddingY + i * (fontSize + 4) + fontSize / 2)
+    })
   }
 
   const graphRef = useRef<any>(null)
@@ -254,16 +258,31 @@ function App() {
           ref={graphRef}
           graphData={{ nodes: filteredGraph?.nodes || [], links: (filteredGraph?.edges || []) as any }}
           nodeCanvasObject={drawNode}
-          linkDirectionalArrowLength={4}
+          linkDirectionalArrowLength={6}
           linkDirectionalParticles={0}
+          linkWidth={1}
+          linkColor={() => '#4b5563'}
+          linkCanvasObject={(link, ctx, globalScale) => {
+            const l = link as GraphEdge & any
+            const label = l.label || l.type || ''
+            if (!label) return
+            const start = l.source
+            const end = l.target
+            if (!start || !end || !('x' in start) || !('x' in end)) return
+            const tx = (start.x + end.x) / 2
+            const ty = (start.y + end.y) / 2
+            const fontSize = 10 / Math.sqrt(globalScale)
+            ctx.font = `${fontSize}px Inter, system-ui`
+            ctx.fillStyle = '#9FB3C8'
+            ctx.textAlign = 'center'
+            ctx.textBaseline = 'middle'
+            ctx.fillText(label, tx, ty)
+          }}
           onNodeClick={handleNodeClick}
           backgroundColor="#0c1116"
-          linkColor={() => '#2d3846'}
-          cooldownTicks={50}
+          cooldownTime={15000}
           onEngineStop={() => {
-            if (!graphRef.current || !filteredGraph?.root) return
-            const rootNode = (graphRef.current as any).graphData().nodes.find((n: any) => n.id === filteredGraph.root)
-            if (rootNode) (graphRef.current as any).centerAt(rootNode.x, rootNode.y, 100)
+            // keep layout stable without hiding nodes; avoid prematurely clearing graph
           }}
         />
       </div>
