@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import ForceGraph2D, { NodeObject, LinkObject } from 'react-force-graph-2d'
+import MindMapTree from './components/MindMapTree'
 import axios from 'axios'
 
 type MetaInput = { id: string; label: string; kind: 'text' | 'number' | 'date' | 'select'; options?: string[] }
@@ -254,36 +255,10 @@ function App() {
       </div>
 
       <div style={{ ...cardStyle, gridColumn: '2 / 3', gridRow: '1 / 3', position: 'relative' }}>
-        <ForceGraph2D
-          ref={graphRef}
-          graphData={{ nodes: filteredGraph?.nodes || [], links: (filteredGraph?.edges || []) as any }}
-          nodeCanvasObject={drawNode}
-          linkDirectionalArrowLength={6}
-          linkDirectionalParticles={0}
-          linkWidth={1}
-          linkColor={() => '#4b5563'}
-          linkCanvasObject={(link, ctx, globalScale) => {
-            const l = link as GraphEdge & any
-            const label = l.label || l.type || ''
-            if (!label) return
-            const start = l.source
-            const end = l.target
-            if (!start || !end || !('x' in start) || !('x' in end)) return
-            const tx = (start.x + end.x) / 2
-            const ty = (start.y + end.y) / 2
-            const fontSize = 10 / Math.sqrt(globalScale)
-            ctx.font = `${fontSize}px Inter, system-ui`
-            ctx.fillStyle = '#9FB3C8'
-            ctx.textAlign = 'center'
-            ctx.textBaseline = 'middle'
-            ctx.fillText(label, tx, ty)
-          }}
-          onNodeClick={handleNodeClick}
-          backgroundColor="#0c1116"
-          cooldownTime={15000}
-          onEngineStop={() => {
-            // keep layout stable without hiding nodes; avoid prematurely clearing graph
-          }}
+        <MindMapTree
+          graph={filteredGraph || null}
+          filterText={filterText}
+          onNodeClick={(n) => setSelectedNode(n)}
         />
       </div>
     </div>
