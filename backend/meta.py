@@ -7,7 +7,7 @@ class Meta:
         return {
             "referenceDataTypes": [
                 {
-                    "type": "StockInstrument",
+                    "type": "Stock",
                     "display": "Stock",
                     "queryBy": [
                         {"type": "InstrumentId", "inputs": [{"id": "InstrumentId", "label": "Instrument ID", "kind": "text"}]},
@@ -19,7 +19,7 @@ class Meta:
                     ],
                 },
                 {
-                    "type": "OptionInstrument",
+                    "type": "Option",
                     "display": "Option",
                     "queryBy": [
                         {"type": "InstrumentId", "inputs": [{"id": "InstrumentId", "label": "Instrument ID", "kind": "text"}]},
@@ -44,7 +44,7 @@ class Meta:
                     ],
                 },
                 {
-                    "type": "FutureInstrument",
+                    "type": "Future",
                     "display": "Future",
                     "queryBy": [
                         {"type": "InstrumentId", "inputs": [{"id": "InstrumentId", "label": "Instrument ID", "kind": "text"}]},
@@ -69,7 +69,7 @@ class Meta:
                     ],
                 },
                 {
-                    "type": "IndexInstrument",
+                    "type": "Index",
                     "display": "Index",
                     "queryBy": [
                         {"type": "InstrumentId", "inputs": [{"id": "InstrumentId", "label": "Instrument ID", "kind": "text"}]},
@@ -81,17 +81,5 @@ class Meta:
                     ],
                 },
             ],
-            "nodeAttributes": {
-                "Stock": ["instrumentId", "isin"],
-                "StockTradingLine": ["tradingLineId", "postTradeId", "ric", "bloombergTicker", "currency"],
-                "Option": ["instrumentId", "isin", "postTradeId", "strike", "contractSize", "expirationDate", "CallOrPut"],
-                "OptionTradingLine": ["tradingLineId", "ric", "bloombergTicker", "currency", "tradingSession"],
-                "Index": ["instrumentId", "isin", "postTradeId"],
-                "IndexTradingLine": ["tradingLineId", "ric", "bloombergTicker", "currency", "tradingSession"],
-                "Future": ["instrumentId", "isin", "postTradeId", "contractSize", "lastTradeDate"],
-                "FutureTradingLine": ["tradingLineId", "ric", "bloombergTicker", "currency", "pricingSession"],
-                "IndexComposition": ["basketId", "totalConstituents"],
-                "Exchange": ["mic"],
-            },
         }
 

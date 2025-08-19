@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 import logging
 from store import FileJsonStore
+from builder import GraphBuilder
 
 logger = logging.getLogger(__name__)
 
@@ -8,6 +9,7 @@ logger = logging.getLogger(__name__)
 class GraphService:
     def __init__(self, store: FileJsonStore):
         self.store = store
+        self.builder = GraphBuilder(store)
 
     def _graph_node_id(self, node_type: str, business_id: str) -> str:
         return f"{node_type}:{business_id}"
@@ -156,59 +158,14 @@ class GraphService:
 
     def search(self, reference_data_type: str, query_by_type: str, inputs: Dict[str, Any]) -> Dict[str, Any]:
         logger.info("search called: refType=%s queryBy=%s inputs=%s", reference_data_type, query_by_type, inputs)
-        type_to_entity = {
-            "StockInstrument": ("Stock", "instrumentId"),
-            "OptionInstrument": ("Option", "instrumentId"),
-            "FutureInstrument": ("Future", "instrumentId"),
-            "IndexInstrument": ("Index", "instrumentId"),
-        }
-        if reference_data_type not in type_to_entity:
-            return {"error": f"Unsupported referenceDataType {reference_data_type}"}
-
-        entity_name, _ = type_to_entity[reference_data_type]
-        attribute_type = query_by_type
-
-        if attribute_type == "Economics":
-            items = self.store.list_all(entity_name)
-
-            def matches(item: Dict[str, Any]) -> bool:
-                strike_ok = (str(item.get("strike")) == str(inputs.get("Strike"))) if inputs.get("Strike") is not None else True
-                csize_ok = (str(item.get("contractSize")) == str(inputs.get("ContractSize"))) if inputs.get("ContractSize") is not None else True
-                exp_ok = (str(item.get("expirationDate")) == str(inputs.get("ExpirationDate"))) if inputs.get("ExpirationDate") is not None else True
-                cp_ok = (str(item.get("CallOrPut")).lower() == str(inputs.get("CallOrPut")).lower()) if inputs.get("CallOrPut") else True
-                underlying_ok = True
-                if inputs.get("UnderlyingId"):
-                    underlying_ok = str(inputs.get("UnderlyingId")) in [str(u) for u in item.get("underlyingInstrumentIds", [])]
-                return strike_ok and csize_ok and exp_ok and cp_ok and underlying_ok
-
-            candidates = [i for i in items if matches(i)]
-        else:
-            value = inputs.get(attribute_type)
-            if value is None:
-                for v in inputs.values():
-                    value = v
-                    break
-            candidates = self.store.find_by_attribute(entity_name, attribute_type, value)
-
-        nodes: Dict[str, Dict[str, Any]] = {}
-        edges: List[Dict[str, Any]] = []
-
-        if not candidates:
-            logger.info("no candidates found for %s by %s", entity_name, attribute_type)
+        # Build graph generically using GraphBuilder
+        try:
+            graph = self.builder.build(reference_data_type, inputs)
+            logger.info("graph built: nodes=%d edges=%d", len(graph.get('nodes', [])), len(graph.get('edges', [])))
+            return graph
+        except Exception as e:
+            logger.exception("Error building graph: %s", e)
             return {"metaVersion": 1, "nodes": [], "edges": [], "root": None}
-
-        root_payload = candidates[0]
-        root_node = self._shape_node(entity_name, root_payload)
-        nodes[root_node["id"]] = root_node
-        self._expand_relationships(entity_name, root_payload, nodes, edges)
-        logger.info("graph built: nodes=%d edges=%d root=%s", len(nodes), len(edges), root_node["id"])
-
-        return {
-            "metaVersion": 1,
-            "nodes": list(nodes.values()),
-            "edges": edges,
-            "root": root_node["id"],
-        }
 
     def expand(self, node_type: str, business_id: str) -> Dict[str, Any]:
         logger.debug("expand called: nodeType=%s id=%s", node_type, business_id)
