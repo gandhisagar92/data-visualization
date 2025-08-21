@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo } from 'react'
-import ReactFlow, { Background, Controls, useEdgesState, useNodesState, Node, Edge, Position } from 'reactflow'
+import React, { useCallback, useEffect } from 'react'
+import ReactFlow, { Background, Controls, useEdgesState, useNodesState, Node, Edge, Position, MarkerType } from 'reactflow'
 import 'reactflow/dist/style.css'
 import dagre from 'dagre'
 import type { GraphResponse, GraphNode, GraphEdge } from './types'
@@ -51,29 +51,38 @@ const nodeTypes = { card: NodeCard }
 type Props = { graph: GraphResponse | null; onNodeClick?: (n: GraphNode) => void }
 
 export default function GraphFlow({ graph, onNodeClick }: Props) {
-  const { rfNodes, rfEdges } = useMemo(() => {
-    const nodes: Node[] = []
-    const edges: Edge[] = []
-    if (!graph) return { rfNodes: nodes, rfEdges: edges }
-    graph.nodes.forEach(n => {
-      nodes.push({ id: n.id, type: 'card', data: { meta: n }, position: { x: 0, y: 0 } })
-    })
-    graph.edges.forEach(e => {
-      edges.push({ id: e.id, source: e.source, target: e.target, animated: false, label: e.label || e.type, style: { stroke: '#4b5563' }, labelStyle: { fill: '#9FB3C8', fontSize: 11 } })
-    })
-    const laid = layoutElements(nodes, edges, 'LR')
-    return { rfNodes: laid.nodes, rfEdges: laid.edges }
-  }, [graph])
-
-  const [nodes, setNodes, onNodesChange] = useNodesState(rfNodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState(rfEdges)
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node[]>([])
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge[]>([])
 
   useEffect(() => {
-    setNodes(rfNodes)
-  }, [rfNodes, setNodes])
-  useEffect(() => {
-    setEdges(rfEdges)
-  }, [rfEdges, setEdges])
+    if (!graph) {
+      setNodes([])
+      setEdges([])
+      return
+    }
+    const nmap: Record<string, Node> = {}
+    const nlist: Node[] = graph.nodes.map(n => {
+      const node: Node = { id: n.id, type: 'card', data: { meta: n }, position: { x: 0, y: 0 } }
+      nmap[n.id] = node
+      return node
+    })
+    const elist: Edge[] = graph.edges
+      .filter(e => nmap[e.source] && nmap[e.target])
+      .map(e => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        type: 'smoothstep',
+        animated: false,
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#4b5563' },
+        style: { stroke: '#4b5563' },
+        label: e.label || e.type,
+        labelStyle: { fill: '#9FB3C8', fontSize: 11 },
+      }))
+    const laid = layoutElements(nlist, elist, 'LR')
+    setNodes([...laid.nodes])
+    setEdges([...laid.edges])
+  }, [graph, setNodes, setEdges])
 
   const handleNodeClick = useCallback((_: any, node: Node) => {
     const meta = node.data?.meta as GraphNode
