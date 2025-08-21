@@ -14,6 +14,11 @@ class GraphBuilder:
         self.nodes: Dict[str, Dict[str, Any]] = {}
         self.edges: List[Dict[str, Any]] = []
 
+    def clear_builder(self):
+        self.root: Optional[BaseNode] = None
+        self.nodes: Dict[str, Dict[str, Any]] = {}
+        self.edges: List[Dict[str, Any]] = []
+
     def build(self, root_type: str, params: Dict[str, Any]) -> Dict[str, Any]:
         if root_type not in NODE_REGISTRY:
             raise ValueError(f"Unknown node type: {root_type}")

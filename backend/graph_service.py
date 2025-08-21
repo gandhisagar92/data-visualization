@@ -161,6 +161,7 @@ class GraphService:
         # Build graph generically using GraphBuilder
         try:
             graph = self.builder.build(reference_data_type, inputs)
+            self.builder.clear_builder()
             logger.info("graph built: nodes=%d edges=%d", len(graph.get('nodes', [])), len(graph.get('edges', [])))
             return graph
         except Exception as e:
