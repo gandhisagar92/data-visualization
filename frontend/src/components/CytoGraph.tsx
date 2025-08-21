@@ -1,14 +1,15 @@
 import React, { useEffect, useMemo, useRef } from 'react'
 import CytoscapeComponent from 'react-cytoscapejs'
 import cytoscape from 'cytoscape'
-// @ts-ignore
-import dagre from 'cytoscape-dagre'
-// @ts-ignore
-import nodeHtmlLabel from 'cytoscape-node-html-label'
+// Use CommonJS require style to ensure plugin registration with cytoscape
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const cytoscapeDagre = require('cytoscape-dagre')
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const cytoscapeHtmlLabel = require('cytoscape-node-html-label')
 import type { GraphResponse } from './types'
 
-cytoscape.use(dagre)
-nodeHtmlLabel(cytoscape)
+cytoscape.use(cytoscapeDagre)
+cytoscapeHtmlLabel(cytoscape)
 
 type Props = {
   graph: GraphResponse | null
@@ -38,11 +39,13 @@ export default function CytoGraph({ graph, isDark, onNodeClick }: Props) {
         'label': 'data(label)',
         'text-valign': 'center',
         'text-halign': 'center',
-        'color': isDark ? '#E2E8F0' : '#0f172a',
+        'color': isDark ? '#0f172a' : '#0f172a',
+        'text-background-color': isDark ? '#0b1426' : '#ffffff',
+        'text-background-opacity': 1,
+        'text-background-padding': 8,
         'font-size': 12,
-        'width': 'label',
-        'height': 'label',
-        'padding': '10px',
+        'width': 220,
+        'height': 60,
         'shape': 'round-rectangle'
       }
     },
@@ -64,8 +67,15 @@ export default function CytoGraph({ graph, isDark, onNodeClick }: Props) {
   useEffect(() => {
     if (!cyRef.current) return
     const cy = cyRef.current
-    cy.layout({ name: 'dagre', rankDir: 'LR', rankSep: 140, nodeSep: 80, edgeSep: 20 }).run()
+    // avoid wheel sensitivity warning; use default zoom speed
+    try {
+      cy.layout({ name: 'dagre', rankDir: 'LR', rankSep: 140, nodeSep: 80, edgeSep: 20 }).run()
+    } catch (e) {
+      // if plugin not ready for some reason, fallback to breadthfirst
+      cy.layout({ name: 'breadthfirst', directed: true, spacingFactor: 1.5 }).run()
+    }
     cy.fit(undefined, 40)
+    cy.off('tap')
     cy.on('tap', 'node', (evt: any) => {
       const n = evt.target
       const id = n.data('id')
@@ -86,7 +96,6 @@ export default function CytoGraph({ graph, isDark, onNodeClick }: Props) {
         stylesheet={stylesheet as any}
         style={{ width: '100%', height: '100%' }}
         cy={(cy: any) => (cyRef.current = cy)}
-        wheelSensitivity={0.2}
       />
     </div>
   )
