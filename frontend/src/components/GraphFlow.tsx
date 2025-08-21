@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo } from 'react'
-import ReactFlow, { Background, Controls, MiniMap, useEdgesState, useNodesState, Node, Edge, Position } from 'reactflow'
+import React, { useCallback, useEffect, useMemo } from 'react'
+import ReactFlow, { Background, Controls, useEdgesState, useNodesState, Node, Edge, Position } from 'reactflow'
 import 'reactflow/dist/style.css'
 import dagre from 'dagre'
 import type { GraphResponse, GraphNode, GraphEdge } from './types'
@@ -68,6 +68,13 @@ export default function GraphFlow({ graph, onNodeClick }: Props) {
   const [nodes, setNodes, onNodesChange] = useNodesState(rfNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(rfEdges)
 
+  useEffect(() => {
+    setNodes(rfNodes)
+  }, [rfNodes, setNodes])
+  useEffect(() => {
+    setEdges(rfEdges)
+  }, [rfEdges, setEdges])
+
   const handleNodeClick = useCallback((_: any, node: Node) => {
     const meta = node.data?.meta as GraphNode
     if (meta && onNodeClick) onNodeClick(meta)
@@ -88,7 +95,6 @@ export default function GraphFlow({ graph, onNodeClick }: Props) {
         defaultEdgeOptions={{ type: 'smoothstep', style: { stroke: '#4b5563' } }}
       >
         <Background gap={20} color="#0f1a2b" />
-        <MiniMap nodeStrokeColor={'#253453'} nodeColor={'#0b1426'} maskColor={'rgba(15,26,43,0.5)'} />
         <Controls position="bottom-left" />
       </ReactFlow>
     </div>
