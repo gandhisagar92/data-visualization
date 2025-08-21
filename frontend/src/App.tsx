@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import MindMapTree from './components/MindMapTree'
+import TreeView from './components/TreeView'
 import axios from 'axios'
 import { logger } from './lib/logger'
 
@@ -14,8 +14,8 @@ type GraphResponse = { metaVersion: number; nodes: GraphNode[]; edges: GraphEdge
 
 const panelStyles: React.CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: '420px 1fr',
-  gridTemplateRows: '330px 1fr',
+  gridTemplateColumns: '1fr 380px',
+  gridTemplateRows: 'auto 1fr',
   height: '100vh',
   gap: '12px',
   padding: '12px',
@@ -121,9 +121,8 @@ function App() {
 
   return (
     <div style={panelStyles}>
-      <div style={{ ...cardStyle, gridColumn: '1 / 2', gridRow: '1 / 2' }}>
-        <h3 style={{ marginTop: 0 }}>Reference Data Relationship Explorer</h3>
-        <div>
+      <div style={{ ...cardStyle, gridColumn: '1 / 3', gridRow: '1 / 2', display: 'flex', alignItems: 'end', gap: 12 }}>
+        <div style={{ flex: '0 0 260px' }}>
           <label style={labelStyle}>Reference Data Type</label>
           <select
             style={selectStyle}
@@ -139,7 +138,7 @@ function App() {
             ))}
           </select>
         </div>
-        <div>
+        <div style={{ flex: '0 0 260px' }}>
           <label style={labelStyle}>Query By</label>
           <select
             style={selectStyle}
@@ -151,9 +150,8 @@ function App() {
             ))}
           </select>
         </div>
-
         {currentQuery?.inputs.map(inp => (
-          <div key={inp.id}>
+          <div key={inp.id} style={{ flex: '0 0 260px' }}>
             <label style={labelStyle}>{inp.label}</label>
             {inp.kind === 'select' ? (
               <select
@@ -176,9 +174,8 @@ function App() {
             )}
           </div>
         ))}
-
-        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-          <button style={buttonStyle} onClick={onSearch}>Search</button>
+        <div style={{ flex: '0 0 220px', alignSelf: 'end' }}>
+          <label style={labelStyle}>Filter</label>
           <input
             placeholder="Filter nodes by attribute..."
             style={{ ...inputStyle, marginBottom: 0 }}
@@ -186,23 +183,22 @@ function App() {
             onChange={e => setFilterText(e.target.value)}
           />
         </div>
+        <div style={{ alignSelf: 'end' }}>
+          <button style={buttonStyle} onClick={onSearch}>Search</button>
+        </div>
       </div>
 
-      <div style={{ ...cardStyle, gridColumn: '1 / 2', gridRow: '2 / 3' }}>
+      <div style={{ ...cardStyle, gridColumn: '2 / 3', gridRow: '2 / 3' }}>
         <h4 style={{ marginTop: 0 }}>Payload</h4>
         {selectedNode ? (
           <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(selectedNode.attributes ?? {}, null, 2)}</pre>
         ) : (
-          <div style={{ color: '#94A3B8' }}>Hover a node to view payload in tooltip; click to pin here</div>
+          <div style={{ color: '#94A3B8' }}>Click a node to view payload</div>
         )}
       </div>
 
-      <div style={{ ...cardStyle, gridColumn: '2 / 3', gridRow: '1 / 3', position: 'relative' }}>
-        <MindMapTree
-          graph={filteredGraph || null}
-          filterText={filterText}
-          onNodeClick={handleNodeClick}
-        />
+      <div style={{ ...cardStyle, gridColumn: '1 / 2', gridRow: '2 / 3', position: 'relative', overflow: 'hidden' }}>
+        <TreeView graph={filteredGraph || null} onNodeClick={handleNodeClick} />
       </div>
     </div>
   )
