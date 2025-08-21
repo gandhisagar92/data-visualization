@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import GraphFlow from './components/GraphFlow'
+import CytoGraph from './components/CytoGraph'
 import axios from 'axios'
 import { logger } from './lib/logger'
 
@@ -14,7 +14,7 @@ type GraphResponse = { metaVersion: number; nodes: GraphNode[]; edges: GraphEdge
 
 const panelStyles: React.CSSProperties = {
   display: 'grid',
-  gridTemplateColumns: '1fr 380px',
+  gridTemplateColumns: '1fr 420px',
   gridTemplateRows: 'auto 1fr',
   height: '100vh',
   gap: '12px',
@@ -25,23 +25,20 @@ const panelStyles: React.CSSProperties = {
   fontFamily: 'Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif'
 }
 
-const cardStyle: React.CSSProperties = {
-  background: 'linear-gradient(180deg, #0f172a 0%, #0b1220 100%)',
-  border: '1px solid #1f2a44',
+const cardStyleBase: React.CSSProperties = {
+  border: '1px solid',
   borderRadius: 16,
   padding: 16,
   overflow: 'auto',
-  boxShadow: '0 10px 25px rgba(0,0,0,0.3)'
+  boxShadow: '0 10px 25px rgba(0,0,0,0.12)'
 }
 
-const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, color: '#94A3B8', marginBottom: 6 }
+const labelStyle: React.CSSProperties = { display: 'block', fontSize: 12, marginBottom: 6 }
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '10px 12px',
   borderRadius: 10,
-  border: '1px solid #243253',
-  background: '#0b1426',
-  color: '#E2E8F0',
+  border: '1px solid',
   marginBottom: 10
 }
 const selectStyle = inputStyle
@@ -49,15 +46,14 @@ const selectStyle = inputStyle
 const buttonStyle: React.CSSProperties = {
   padding: '10px 14px',
   borderRadius: 10,
-  border: '1px solid #1f2a44',
-  background: 'linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%)',
-  color: 'white',
+  border: '1px solid',
   cursor: 'pointer',
   fontWeight: 600,
-  boxShadow: '0 6px 16px rgba(29,78,216,0.35)'
+  boxShadow: '0 6px 16px rgba(0,0,0,0.08)'
 }
 
 function App() {
+  const [isDark, setIsDark] = useState(true)
   const [meta, setMeta] = useState<Meta | null>(null)
   const [refType, setRefType] = useState<string>('Stock')
   const [queryBy, setQueryBy] = useState<string>('InstrumentId')
@@ -120,12 +116,29 @@ function App() {
   }
 
   return (
-    <div style={panelStyles}>
-      <div style={{ ...cardStyle, gridColumn: '1 / 3', gridRow: '1 / 2', display: 'flex', alignItems: 'end', gap: 12 }}>
-        <div style={{ flex: '0 0 260px' }}>
-          <label style={labelStyle}>Reference Data Type</label>
+    <div style={{ ...panelStyles, background: isDark ? '#0b1220' : '#f8fafc', color: isDark ? '#E2E8F0' : '#0f172a' }}>
+      <div style={{
+        ...cardStyleBase,
+        background: isDark ? 'linear-gradient(180deg, #0f172a 0%, #0b1220 100%)' : '#ffffff',
+        borderColor: isDark ? '#1f2a44' : '#e2e8f0',
+        gridColumn: '1 / 3', gridRow: '1 / 2', display: 'flex', alignItems: 'end', gap: 12, flexWrap: 'wrap'
+      }}>
+        <div style={{ marginLeft: 'auto' }}>
+          <label style={{ ...labelStyle, color: isDark ? '#94A3B8' : '#64748b' }}>Theme</label>
+          <button
+            style={{
+              ...buttonStyle,
+              background: isDark ? '#111827' : '#e2e8f0',
+              color: isDark ? '#E2E8F0' : '#0f172a',
+              borderColor: isDark ? '#374151' : '#cbd5e1'
+            }}
+            onClick={() => setIsDark(v => !v)}
+          >{isDark ? 'Dark' : 'Light'}</button>
+        </div>
+        <div style={{ minWidth: 240, flex: '1 1 240px' }}>
+          <label style={{ ...labelStyle, color: isDark ? '#94A3B8' : '#64748b' }}>Reference Data Type</label>
           <select
-            style={selectStyle}
+            style={{ ...selectStyle, background: isDark ? '#0b1426' : '#ffffff', color: isDark ? '#E2E8F0' : '#0f172a', borderColor: isDark ? '#243253' : '#cbd5e1' }}
             value={refType}
             onChange={e => {
               setRefType(e.target.value)
@@ -138,10 +151,10 @@ function App() {
             ))}
           </select>
         </div>
-        <div style={{ flex: '0 0 260px' }}>
-          <label style={labelStyle}>Query By</label>
+        <div style={{ minWidth: 240, flex: '1 1 240px' }}>
+          <label style={{ ...labelStyle, color: isDark ? '#94A3B8' : '#64748b' }}>Query By</label>
           <select
-            style={selectStyle}
+            style={{ ...selectStyle, background: isDark ? '#0b1426' : '#ffffff', color: isDark ? '#E2E8F0' : '#0f172a', borderColor: isDark ? '#243253' : '#cbd5e1' }}
             value={queryBy}
             onChange={e => setQueryBy(e.target.value)}
           >
@@ -151,11 +164,11 @@ function App() {
           </select>
         </div>
         {currentQuery?.inputs.map(inp => (
-          <div key={inp.id} style={{ flex: '0 0 260px' }}>
-            <label style={labelStyle}>{inp.label}</label>
+          <div key={inp.id} style={{ minWidth: 240, flex: '1 1 240px' }}>
+            <label style={{ ...labelStyle, color: isDark ? '#94A3B8' : '#64748b' }}>{inp.label}</label>
             {inp.kind === 'select' ? (
               <select
-                style={selectStyle}
+                style={{ ...selectStyle, background: isDark ? '#0b1426' : '#ffffff', color: isDark ? '#E2E8F0' : '#0f172a', borderColor: isDark ? '#243253' : '#cbd5e1' }}
                 value={inputs[inp.id] ?? ''}
                 onChange={e => setInputs({ ...inputs, [inp.id]: e.target.value })}
               >
@@ -166,7 +179,7 @@ function App() {
               </select>
             ) : (
               <input
-                style={inputStyle}
+                style={{ ...inputStyle, background: isDark ? '#0b1426' : '#ffffff', color: isDark ? '#0f172a' : '#0f172a', borderColor: isDark ? '#243253' : '#cbd5e1' }}
                 type={inp.kind}
                 value={inputs[inp.id] ?? ''}
                 onChange={e => setInputs({ ...inputs, [inp.id]: e.target.value })}
@@ -174,22 +187,27 @@ function App() {
             )}
           </div>
         ))}
-        <div style={{ flex: '0 0 220px', alignSelf: 'end' }}>
-          <label style={labelStyle}>Filter</label>
+        <div style={{ minWidth: 220, flex: '1 1 220px', alignSelf: 'end' }}>
+          <label style={{ ...labelStyle, color: isDark ? '#94A3B8' : '#64748b' }}>Filter</label>
           <input
             placeholder="Filter nodes by attribute..."
-            style={{ ...inputStyle, marginBottom: 0 }}
+            style={{ ...inputStyle, marginBottom: 0, background: isDark ? '#0b1426' : '#ffffff', color: isDark ? '#0f172a' : '#0f172a', borderColor: isDark ? '#243253' : '#cbd5e1' }}
             value={filterText}
             onChange={e => setFilterText(e.target.value)}
           />
         </div>
         <div style={{ alignSelf: 'end' }}>
-          <button style={buttonStyle} onClick={onSearch}>Search</button>
+          <button style={{ ...buttonStyle, background: isDark ? '#2563eb' : '#1d4ed8', color: '#ffffff', borderColor: isDark ? '#1f2a44' : '#cbd5e1' }} onClick={onSearch}>Search</button>
         </div>
       </div>
 
-      <div style={{ ...cardStyle, gridColumn: '2 / 3', gridRow: '2 / 3' }}>
-        <h4 style={{ marginTop: 0 }}>Payload</h4>
+      <div style={{
+        ...cardStyleBase,
+        background: isDark ? 'linear-gradient(180deg, #0f172a 0%, #0b1220 100%)' : '#ffffff',
+        borderColor: isDark ? '#1f2a44' : '#e2e8f0',
+        gridColumn: '2 / 3', gridRow: '2 / 3'
+      }}>
+        <h4 style={{ marginTop: 0, color: isDark ? '#E2E8F0' : '#0f172a' }}>Payload</h4>
         {selectedNode ? (
           <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(selectedNode.attributes ?? {}, null, 2)}</pre>
         ) : (
@@ -197,8 +215,13 @@ function App() {
         )}
       </div>
 
-      <div style={{ ...cardStyle, gridColumn: '1 / 2', gridRow: '2 / 3', position: 'relative', overflow: 'hidden' }}>
-        <GraphFlow graph={filteredGraph || null} onNodeClick={handleNodeClick} />
+      <div style={{
+        ...cardStyleBase,
+        background: isDark ? 'linear-gradient(180deg, #0f172a 0%, #0b1220 100%)' : '#ffffff',
+        borderColor: isDark ? '#1f2a44' : '#e2e8f0',
+        gridColumn: '1 / 2', gridRow: '2 / 3', position: 'relative', overflow: 'hidden'
+      }}>
+        <CytoGraph graph={filteredGraph || null} isDark={isDark} onNodeClick={(id, type) => handleNodeClick({ id, type, attributes: {} })} />
       </div>
     </div>
   )

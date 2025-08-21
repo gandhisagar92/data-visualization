@@ -10,10 +10,14 @@
   },
   "dependencies": {
     "axios": "^1.7.2",
+    "cytoscape": "^3.30.2",
+    "cytoscape-dagre": "^2.5.0",
+    "cytoscape-node-html-label": "^1.2.2",
     "dagre": "^0.8.5",
     "force-graph": "1.49.5",
     "framer-motion": "^11.3.31",
     "react": "^18.2.0",
+    "react-cytoscapejs": "^1.2.1",
     "react-d3-tree": "^3.6.2",
     "react-dom": "^18.2.0",
     "react-force-graph-2d": "1.27.1",
@@ -22,6 +26,7 @@
   "devDependencies": {
     "@types/dagre": "^0.7.53",
     "@types/react": "^18.2.66",
+    "@types/react-cytoscapejs": "^1.2.5",
     "@types/react-dom": "^18.2.22",
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "^5.4.5",
