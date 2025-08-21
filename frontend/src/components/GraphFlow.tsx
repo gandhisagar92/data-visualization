@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react'
-import ReactFlow, { Background, Controls, useEdgesState, useNodesState, Node, Edge, Position, MarkerType } from 'reactflow'
+import ReactFlow, { Background, Controls, useEdgesState, useNodesState, Node, Edge, Position, MarkerType, Handle } from 'reactflow'
 import 'reactflow/dist/style.css'
 import dagre from 'dagre'
 import type { GraphResponse, GraphNode, GraphEdge } from './types'
@@ -30,18 +30,22 @@ function NodeCard({ data }: any) {
   const attrs = meta.attributes || {}
   const tooltip = [meta.label || meta.id, ...Object.entries(attrs).map(([k, v]) => `${k}: ${String(v)}`)].join('\n')
   return (
-    <div title={tooltip} style={{
-      border: '1px solid #253453',
-      background: '#0b1426',
-      color: '#E2E8F0',
-      borderRadius: 10,
-      padding: '8px 10px',
-      width: nodeWidth - 2,
-      height: nodeHeight - 2,
-      boxShadow: '0 8px 22px rgba(0,0,0,0.35)'
-    }}>
-      <div style={{ fontSize: 10, color: '#93A3B8', marginBottom: 2 }}>{meta.type}</div>
-      <div style={{ fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{meta.label || meta.id}</div>
+    <div title={tooltip} style={{ position: 'relative' }}>
+      <Handle type="target" position={Position.Left} style={{ opacity: 0, width: 6, height: 6 }} />
+      <div style={{
+        border: '1px solid #253453',
+        background: '#0b1426',
+        color: '#E2E8F0',
+        borderRadius: 10,
+        padding: '8px 10px',
+        width: nodeWidth - 2,
+        height: nodeHeight - 2,
+        boxShadow: '0 8px 22px rgba(0,0,0,0.35)'
+      }}>
+        <div style={{ fontSize: 10, color: '#93A3B8', marginBottom: 2 }}>{meta.type}</div>
+        <div style={{ fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{meta.label || meta.id}</div>
+      </div>
+      <Handle type="source" position={Position.Right} style={{ opacity: 0, width: 6, height: 6 }} />
     </div>
   )
 }
