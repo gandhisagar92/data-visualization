@@ -1,15 +1,9 @@
 import React, { useEffect, useMemo, useRef } from 'react'
 import CytoscapeComponent from 'react-cytoscapejs'
 import cytoscape from 'cytoscape'
-// Use CommonJS require style to ensure plugin registration with cytoscape
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const cytoscapeDagre = require('cytoscape-dagre')
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const cytoscapeHtmlLabel = require('cytoscape-node-html-label')
 import type { GraphResponse } from './types'
 
-cytoscape.use(cytoscapeDagre)
-cytoscapeHtmlLabel(cytoscape)
+// Plugins registered lazily in effect to avoid SSR/require issues
 
 type Props = {
   graph: GraphResponse | null
@@ -67,21 +61,29 @@ export default function CytoGraph({ graph, isDark, onNodeClick }: Props) {
   useEffect(() => {
     if (!cyRef.current) return
     const cy = cyRef.current
-    // avoid wheel sensitivity warning; use default zoom speed
-    try {
-      cy.layout({ name: 'dagre', rankDir: 'LR', rankSep: 140, nodeSep: 80, edgeSep: 20 }).run()
-    } catch (e) {
-      // if plugin not ready for some reason, fallback to breadthfirst
-      cy.layout({ name: 'breadthfirst', directed: true, spacingFactor: 1.5 }).run()
-    }
-    cy.fit(undefined, 40)
-    cy.off('tap')
-    cy.on('tap', 'node', (evt: any) => {
-      const n = evt.target
-      const id = n.data('id')
-      const type = n.data('type')
-      onNodeClick && onNodeClick(id, type)
-    })
+    ;(async () => {
+      try {
+        const mod: any = await import('cytoscape-dagre')
+        const plugin = mod.default || mod
+        // Register once
+        // @ts-ignore
+        if (!(cytoscape as any).__dagre_registered) {
+          cytoscape.use(plugin)
+          ;(cytoscape as any).__dagre_registered = true
+        }
+        cy.layout({ name: 'dagre', rankDir: 'LR', rankSep: 140, nodeSep: 80, edgeSep: 20 }).run()
+      } catch (e) {
+        cy.layout({ name: 'breadthfirst', directed: true, spacingFactor: 1.5 }).run()
+      }
+      cy.fit(undefined, 40)
+      cy.off('tap')
+      cy.on('tap', 'node', (evt: any) => {
+        const n = evt.target
+        const id = n.data('id')
+        const type = n.data('type')
+        onNodeClick && onNodeClick(id, type)
+      })
+    })()
   }, [elements, onNodeClick])
 
   useEffect(() => {
