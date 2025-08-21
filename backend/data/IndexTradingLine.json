@@ -1,0 +1,11 @@
+[
+  {
+    "tradingLineId": "NDX.O",
+    "ric": "NDX.O",
+    "bloombergTicker": "NDX Index",
+    "currency": "USD",
+    "exchangeMic": "XNAS",
+    "tradingSession": "REG"
+  }
+]
+

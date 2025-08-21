@@ -1,0 +1,8 @@
+[
+  {
+    "basketId": "NDX-BASKET",
+    "totalConstituents": 4,
+    "constituentStocks": ["AAPL", "MSFT", "GOOG", "TSLA"]
+  }
+]
+

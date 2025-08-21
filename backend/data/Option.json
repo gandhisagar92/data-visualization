@@ -1,0 +1,25 @@
+[
+  {
+    "instrumentId": "AAPL240621C00190000",
+    "isin": "US0378331005-OPT1",
+    "postTradeId": "OPT-PT-1",
+    "strike": 190,
+    "contractSize": 100,
+    "expirationDate": "2024-06-21",
+    "CallOrPut": "Call",
+    "tradingLines": ["AAPL240621C00190000.O"],
+    "underlyingInstrumentIds": ["AAPL"]
+  },
+  {
+    "instrumentId": "MSFT240621P00280000",
+    "isin": "US5949181045-OPT1",
+    "postTradeId": "OPT-PT-2",
+    "strike": 280,
+    "contractSize": 100,
+    "expirationDate": "2024-06-21",
+    "CallOrPut": "Put",
+    "tradingLines": ["MSFT240621P00280000.O"],
+    "underlyingInstrumentIds": ["MSFT"]
+  }
+]
+

@@ -1,0 +1,11 @@
+[
+  {
+    "tradingLineId": "ESZ4.CME",
+    "ric": "ESZ4",
+    "bloombergTicker": "ESZ4 Index Future",
+    "currency": "USD",
+    "exchangeMic": "XCME",
+    "pricingSession": "REG"
+  }
+]
+

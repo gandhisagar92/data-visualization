@@ -1,0 +1,12 @@
+[
+  {
+    "instrumentId": "ESZ4",
+    "isin": "FUT-ESZ4",
+    "postTradeId": "FUT-PT-1",
+    "contractSize": 50,
+    "lastTradeDate": "2024-12-20",
+    "tradingLines": ["ESZ4.CME"],
+    "underlyingInstrumentIds": ["NDX"]
+  }
+]
+
