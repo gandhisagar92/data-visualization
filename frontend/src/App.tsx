@@ -59,7 +59,7 @@ const buttonStyle: React.CSSProperties = {
 
 function App() {
   const [meta, setMeta] = useState<Meta | null>(null)
-  const [refType, setRefType] = useState<string>('StockInstrument')
+  const [refType, setRefType] = useState<string>('Stock')
   const [queryBy, setQueryBy] = useState<string>('InstrumentId')
   const [inputs, setInputs] = useState<Record<string, any>>({})
   const [graph, setGraph] = useState<GraphResponse | null>(null)
@@ -89,7 +89,7 @@ function App() {
   }, [currentQuery?.type])
 
   const onSearch = async () => {
-    logger.info('Search', { refType, queryBy, inputs })
+    logger.info('Search', { referenceDataType: refType, queryByType: queryBy, inputs })
     const res = await axios.post('/api/search', {
       referenceDataType: refType,
       queryByType: queryBy,
