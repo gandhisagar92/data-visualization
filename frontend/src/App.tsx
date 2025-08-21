@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import CytoGraph from './components/CytoGraph'
-import SplitPane from 'react-split-pane'
+import Split from 'react-split'
 import axios from 'axios'
 import { logger } from './lib/logger'
 
@@ -168,7 +168,7 @@ function App() {
               </select>
             ) : (
               <input
-                style={{ ...inputStyle, background: isDark ? '#0b1426' : '#ffffff', color: isDark ? '#0f172a' : '#0f172a', borderColor: isDark ? '#243253' : '#cbd5e1' }}
+                style={{ ...inputStyle, background: '#ffffff', color: '#0f172a', borderColor: '#cbd5e1' }}
                 type={inp.kind}
                 value={inputs[inp.id] ?? ''}
                 onChange={e => setInputs({ ...inputs, [inp.id]: e.target.value })}
@@ -177,73 +177,51 @@ function App() {
           </div>
         ))}
         <div style={{ minWidth: 220, flex: '1 1 220px', alignSelf: 'end' }}>
-          <label style={{ ...labelStyle, color: isDark ? '#94A3B8' : '#64748b' }}>Filter</label>
+          <label style={{ ...labelStyle, color: '#64748b' }}>Filter</label>
           <input
             placeholder="Filter nodes by attribute..."
-            style={{ ...inputStyle, marginBottom: 0, background: isDark ? '#0b1426' : '#ffffff', color: isDark ? '#0f172a' : '#0f172a', borderColor: isDark ? '#243253' : '#cbd5e1' }}
+            style={{ ...inputStyle, marginBottom: 0, background: '#ffffff', color: '#0f172a', borderColor: '#cbd5e1' }}
             value={filterText}
             onChange={e => setFilterText(e.target.value)}
           />
         </div>
         <div style={{ alignSelf: 'end' }}>
-          <button style={{ ...buttonStyle, background: isDark ? '#2563eb' : '#1d4ed8', color: '#ffffff', borderColor: isDark ? '#1f2a44' : '#cbd5e1' }} onClick={onSearch}>Search</button>
+          <button style={{ ...buttonStyle, background: '#1d4ed8', color: '#ffffff', borderColor: '#cbd5e1' }} onClick={onSearch}>Search</button>
         </div>
       </div>
 
-      <SplitPane split="vertical" minSize={320} defaultSize={380} style={{ gridColumn: '1 / 3', gridRow: '2 / 3', position: 'relative' }}>
-        <SplitPane split="horizontal" minSize={240} defaultSize={280}>
-          <div style={{
-            ...cardStyleBase,
-            background: '#ffffff', borderColor: '#e2e8f0', height: '100%', overflow: 'auto'
-          }}>
-            {/* Inputs panel already rendered above; replicate for left pane per spec if needed */}
-            <div>
-              {currentQuery?.inputs.map(inp => (
-                <div key={inp.id} style={{ marginBottom: 8 }}>
-                  <label style={{ ...labelStyle, color: '#64748b' }}>{inp.label}</label>
-                  {inp.kind === 'select' ? (
-                    <select
-                      style={{ ...selectStyle, background: '#ffffff', color: '#0f172a', borderColor: '#cbd5e1' }}
-                      value={inputs[inp.id] ?? ''}
-                      onChange={e => setInputs({ ...inputs, [inp.id]: e.target.value })}
-                    >
-                      <option value="">Select...</option>
-                      {inp.options?.map(opt => (
-                        <option key={opt} value={opt}>{opt}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    <input
-                      style={{ ...inputStyle, marginBottom: 0, background: '#ffffff', color: '#0f172a', borderColor: '#cbd5e1' }}
-                      type={inp.kind}
-                      value={inputs[inp.id] ?? ''}
-                      onChange={e => setInputs({ ...inputs, [inp.id]: e.target.value })}
-                    />
-                  )}
-                </div>
-              ))}
-              <button style={{ ...buttonStyle, background: '#1d4ed8', color: '#ffffff', borderColor: '#cbd5e1' }} onClick={onSearch}>Search</button>
-            </div>
+      <div style={{ gridColumn: '1 / 3', gridRow: '2 / 3', position: 'relative' }}>
+        <Split sizes={[35, 65]} minSize={320} direction="horizontal" style={{ height: '100%' }}>
+          <div>
+            <Split sizes={[50, 50]} minSize={200} direction="vertical" style={{ height: '100%' }}>
+              <div style={{
+                ...cardStyleBase,
+                background: '#ffffff', borderColor: '#e2e8f0', height: '100%', overflow: 'auto', padding: 12
+              }}>
+                {/* Left upper: inputs mirror if needed; we keep it simple */}
+                {/* Already provided in header; optional duplication omitted */}
+              </div>
+              <div style={{
+                ...cardStyleBase,
+                background: '#ffffff', borderColor: '#e2e8f0', height: '100%', overflow: 'auto'
+              }}>
+                <h4 style={{ marginTop: 0, color: '#0f172a' }}>Payload</h4>
+                {selectedNode ? (
+                  <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(selectedNode.attributes ?? {}, null, 2)}</pre>
+                ) : (
+                  <div style={{ color: '#64748b' }}>Click a node to view payload</div>
+                )}
+              </div>
+            </Split>
           </div>
           <div style={{
             ...cardStyleBase,
-            background: '#ffffff', borderColor: '#e2e8f0', height: '100%', overflow: 'auto'
+            background: '#ffffff', borderColor: '#e2e8f0', height: '100%', overflow: 'hidden'
           }}>
-            <h4 style={{ marginTop: 0, color: '#0f172a' }}>Payload</h4>
-            {selectedNode ? (
-              <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(selectedNode.attributes ?? {}, null, 2)}</pre>
-            ) : (
-              <div style={{ color: '#64748b' }}>Click a node to view payload</div>
-            )}
+            <CytoGraph graph={filteredGraph || null} isDark={isDark} onNodeClick={(id, type) => handleNodeClick({ id, type, attributes: {} })} />
           </div>
-        </SplitPane>
-        <div style={{
-          ...cardStyleBase,
-          background: '#ffffff', borderColor: '#e2e8f0', height: '100%', overflow: 'hidden'
-        }}>
-          <CytoGraph graph={filteredGraph || null} isDark={isDark} onNodeClick={(id, type) => handleNodeClick({ id, type, attributes: {} })} />
-        </div>
-      </SplitPane>
+        </Split>
+      </div>
     </div>
   )
 }

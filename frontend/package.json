@@ -21,7 +21,7 @@
     "react-d3-tree": "^3.6.2",
     "react-dom": "^18.2.0",
     "react-force-graph-2d": "1.27.1",
-    "react-split-pane": "^0.1.92",
+    "react-split": "^2.0.14",
     "reactflow": "^11.10.0"
   },
   "devDependencies": {
