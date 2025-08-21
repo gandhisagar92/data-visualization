@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import CytoGraph from './components/CytoGraph'
+import SplitPane from 'react-split-pane'
 import axios from 'axios'
 import { logger } from './lib/logger'
 
@@ -53,7 +54,7 @@ const buttonStyle: React.CSSProperties = {
 }
 
 function App() {
-  const [isDark, setIsDark] = useState(true)
+  const isDark = false
   const [meta, setMeta] = useState<Meta | null>(null)
   const [refType, setRefType] = useState<string>('Stock')
   const [queryBy, setQueryBy] = useState<string>('InstrumentId')
@@ -116,25 +117,13 @@ function App() {
   }
 
   return (
-    <div style={{ ...panelStyles, background: isDark ? '#0b1220' : '#f8fafc', color: isDark ? '#E2E8F0' : '#0f172a' }}>
+    <div style={{ ...panelStyles, background: '#f8fafc', color: '#0f172a' }}>
       <div style={{
         ...cardStyleBase,
-        background: isDark ? 'linear-gradient(180deg, #0f172a 0%, #0b1220 100%)' : '#ffffff',
-        borderColor: isDark ? '#1f2a44' : '#e2e8f0',
+        background: '#ffffff',
+        borderColor: '#e2e8f0',
         gridColumn: '1 / 3', gridRow: '1 / 2', display: 'flex', alignItems: 'end', gap: 12, flexWrap: 'wrap'
       }}>
-        <div style={{ marginLeft: 'auto' }}>
-          <label style={{ ...labelStyle, color: isDark ? '#94A3B8' : '#64748b' }}>Theme</label>
-          <button
-            style={{
-              ...buttonStyle,
-              background: isDark ? '#111827' : '#e2e8f0',
-              color: isDark ? '#E2E8F0' : '#0f172a',
-              borderColor: isDark ? '#374151' : '#cbd5e1'
-            }}
-            onClick={() => setIsDark(v => !v)}
-          >{isDark ? 'Dark' : 'Light'}</button>
-        </div>
         <div style={{ minWidth: 240, flex: '1 1 240px' }}>
           <label style={{ ...labelStyle, color: isDark ? '#94A3B8' : '#64748b' }}>Reference Data Type</label>
           <select
@@ -201,28 +190,60 @@ function App() {
         </div>
       </div>
 
-      <div style={{
-        ...cardStyleBase,
-        background: isDark ? 'linear-gradient(180deg, #0f172a 0%, #0b1220 100%)' : '#ffffff',
-        borderColor: isDark ? '#1f2a44' : '#e2e8f0',
-        gridColumn: '2 / 3', gridRow: '2 / 3'
-      }}>
-        <h4 style={{ marginTop: 0, color: isDark ? '#E2E8F0' : '#0f172a' }}>Payload</h4>
-        {selectedNode ? (
-          <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(selectedNode.attributes ?? {}, null, 2)}</pre>
-        ) : (
-          <div style={{ color: '#94A3B8' }}>Click a node to view payload</div>
-        )}
-      </div>
-
-      <div style={{
-        ...cardStyleBase,
-        background: isDark ? 'linear-gradient(180deg, #0f172a 0%, #0b1220 100%)' : '#ffffff',
-        borderColor: isDark ? '#1f2a44' : '#e2e8f0',
-        gridColumn: '1 / 2', gridRow: '2 / 3', position: 'relative', overflow: 'hidden'
-      }}>
-        <CytoGraph graph={filteredGraph || null} isDark={isDark} onNodeClick={(id, type) => handleNodeClick({ id, type, attributes: {} })} />
-      </div>
+      <SplitPane split="vertical" minSize={320} defaultSize={380} style={{ gridColumn: '1 / 3', gridRow: '2 / 3', position: 'relative' }}>
+        <SplitPane split="horizontal" minSize={240} defaultSize={280}>
+          <div style={{
+            ...cardStyleBase,
+            background: '#ffffff', borderColor: '#e2e8f0', height: '100%', overflow: 'auto'
+          }}>
+            {/* Inputs panel already rendered above; replicate for left pane per spec if needed */}
+            <div>
+              {currentQuery?.inputs.map(inp => (
+                <div key={inp.id} style={{ marginBottom: 8 }}>
+                  <label style={{ ...labelStyle, color: '#64748b' }}>{inp.label}</label>
+                  {inp.kind === 'select' ? (
+                    <select
+                      style={{ ...selectStyle, background: '#ffffff', color: '#0f172a', borderColor: '#cbd5e1' }}
+                      value={inputs[inp.id] ?? ''}
+                      onChange={e => setInputs({ ...inputs, [inp.id]: e.target.value })}
+                    >
+                      <option value="">Select...</option>
+                      {inp.options?.map(opt => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      style={{ ...inputStyle, marginBottom: 0, background: '#ffffff', color: '#0f172a', borderColor: '#cbd5e1' }}
+                      type={inp.kind}
+                      value={inputs[inp.id] ?? ''}
+                      onChange={e => setInputs({ ...inputs, [inp.id]: e.target.value })}
+                    />
+                  )}
+                </div>
+              ))}
+              <button style={{ ...buttonStyle, background: '#1d4ed8', color: '#ffffff', borderColor: '#cbd5e1' }} onClick={onSearch}>Search</button>
+            </div>
+          </div>
+          <div style={{
+            ...cardStyleBase,
+            background: '#ffffff', borderColor: '#e2e8f0', height: '100%', overflow: 'auto'
+          }}>
+            <h4 style={{ marginTop: 0, color: '#0f172a' }}>Payload</h4>
+            {selectedNode ? (
+              <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(selectedNode.attributes ?? {}, null, 2)}</pre>
+            ) : (
+              <div style={{ color: '#64748b' }}>Click a node to view payload</div>
+            )}
+          </div>
+        </SplitPane>
+        <div style={{
+          ...cardStyleBase,
+          background: '#ffffff', borderColor: '#e2e8f0', height: '100%', overflow: 'hidden'
+        }}>
+          <CytoGraph graph={filteredGraph || null} isDark={isDark} onNodeClick={(id, type) => handleNodeClick({ id, type, attributes: {} })} />
+        </div>
+      </SplitPane>
     </div>
   )
 }
