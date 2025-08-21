@@ -1,1 +1,1 @@
-{"root":["./src/App.tsx","./src/main.tsx","./src/components/CytoGraph.tsx","./src/components/GraphFlow.tsx","./src/components/MindMapTree.tsx","./src/components/TreeView.tsx","./src/components/types.ts","./src/lib/logger.ts","./src/types/cytoscape-dagre.d.ts"],"version":"5.9.2"}
+{"root":["./src/App.tsx","./src/global.d.ts","./src/main.tsx","./src/components/CytoGraph.tsx","./src/components/GraphFlow.tsx","./src/components/MindMapTree.tsx","./src/components/TreeView.tsx","./src/components/types.ts","./src/lib/logger.ts","./src/types/cytoscape-dagre.d.ts"],"version":"5.9.2"}
