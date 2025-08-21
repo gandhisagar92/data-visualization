@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import TreeView from './components/TreeView'
+import GraphFlow from './components/GraphFlow'
 import axios from 'axios'
 import { logger } from './lib/logger'
 
@@ -198,7 +198,7 @@ function App() {
       </div>
 
       <div style={{ ...cardStyle, gridColumn: '1 / 2', gridRow: '2 / 3', position: 'relative', overflow: 'hidden' }}>
-        <TreeView graph={filteredGraph || null} onNodeClick={handleNodeClick} />
+        <GraphFlow graph={filteredGraph || null} onNodeClick={handleNodeClick} />
       </div>
     </div>
   )
